@@ -158,11 +158,10 @@ void DisplayManager::showSensorAndFuelData(float shtTemp, float shtHum,
     
     _display->setCursor(0, 25);
     if (fuelLevel >= 0) {
-        _display->print("Level: ");
+        _display->print("Units: ");
         _display->print(fuelLevel);
-        _display->print(" L");
     } else {
-        _display->print("Level: N/A");
+        _display->print("Units: N/A");
     }
     
     display();
@@ -249,11 +248,10 @@ void DisplayManager::showFuelDetails(float fuelTemp, int fuelLevel, int levelMax
     
     // Current level with tank visualization
     _display->setCursor(0, 20);
-    _display->print("LEVEL:");
+    _display->print("UNITS:");
     _display->setCursor(50, 20);
     if (fuelLevel >= 0) {
         _display->print(fuelLevel);
-        _display->print("L");
         
         // Tank level visualization
         if (levelMax > 0 && levelMin >= 0) {
@@ -373,8 +371,6 @@ void DisplayManager::showMainMenu(float shtTemp, float shtHum, float fuelTemp, i
         _display->setCursor(2, 18);
         if (fuel_available && fuelLevel >= 0) {
             _display->print(fuelLevel);
-            _display->setTextSize(1);
-            _display->print("L");
         } else {
             _display->setTextSize(1);
             _display->print("N/A");
@@ -407,17 +403,16 @@ void DisplayManager::showMainMenu(float shtTemp, float shtHum, float fuelTemp, i
         _display->setTextSize(1);
         _display->setCursor(66, 10);
         _display->print("SHT");
-        
+        _display->setTextSize(2);
         // Temperature and humidity with larger text
         if (sht_available && !isnan(shtTemp) && !isnan(shtHum)) {
             _display->setCursor(66, 18);
             _display->print((int)shtTemp);
-            _display->print("C");
-            _display->setCursor(66, 26);
+            _display->print("-");
             _display->print((int)shtHum);
             _display->print("%");
         } else {
-            _display->setCursor(66, 22);
+            _display->setCursor(66, 18);
             _display->print("N/A");
         }
         _display->setTextColor(WHITE); // Reset color
@@ -426,16 +421,15 @@ void DisplayManager::showMainMenu(float shtTemp, float shtHum, float fuelTemp, i
         _display->setTextSize(1);
         _display->setCursor(66, 10);
         _display->print("SHT");
-        
+        _display->setTextSize(2);
         if (sht_available && !isnan(shtTemp) && !isnan(shtHum)) {
             _display->setCursor(66, 18);
             _display->print((int)shtTemp);
-            _display->print("C");
-            _display->setCursor(66, 26);
+            _display->print("-");
             _display->print((int)shtHum);
             _display->print("%");
         } else {
-            _display->setCursor(66, 22);
+            _display->setCursor(66, 18);
             _display->print("N/A");
         }
     }
@@ -452,55 +446,69 @@ void DisplayManager::showMainMenu(float shtTemp, float shtHum, float fuelTemp, i
 void DisplayManager::showSettingMenu(int currentSetting) {
     clear();
     
-    // Title with border
-    _display->setCursor(14, 0);
+    // Draw title "== CALIBRATION ==" at top (similar to u8g2 style)
+    _display->setTextSize(1);
+    _display->setCursor(10, 1);
     _display->print("== CALIBRATION ==");
     
-    // Draw horizontal line under title
-    _display->drawLine(0, 7, 128, 7, WHITE);
+    // Setting names array
+    const char* settingNames[] = {
+        "Set FULL Tank",
+        "Set EMPTY Tank", 
+        "Factory Reset",
+        "Restart Sensor",
+        "Read Empty Freq"
+    };
     
-    // Set Full option with icon
-    if (currentSetting == 0) { // SETTING_SET_FULL
-        // Draw inverted background for highlighted item
-        _display->fillRect(0, 9, 128, 8, WHITE);
-        _display->setTextColor(BLACK);
-        _display->setCursor(0, 9);
-        _display->print(">");
-        _display->fillRect(10, 10, 6, 6, BLACK); // Filled square icon
-        _display->setCursor(20, 9);
-        _display->print("Set FULL Tank");
-        _display->setTextColor(WHITE); // Reset color
-    } else {
-        _display->setCursor(0, 9);
-        _display->print(" ");
-        _display->drawRect(10, 10, 6, 6, WHITE); // Empty square icon
-        _display->setCursor(20, 9);
-        _display->print("Set FULL Tank");
-    }
+    // Draw main setting text at center position (like u8g2 example at 25, 26)
+    _display->setCursor(25, 12);
+    _display->print(settingNames[currentSetting]);
     
-    // Set Empty option with icon
-    if (currentSetting == 1) { // SETTING_SET_EMPTY
-        // Draw inverted background for highlighted item
-        _display->fillRect(0, 17, 128, 8, WHITE);
-        _display->setTextColor(BLACK);
-        _display->setCursor(0, 17);
-        _display->print(">");
-        _display->fillRect(10,18, 6, 6, BLACK); // Filled square icon
-        _display->setCursor(20, 17);
-        _display->print("Set EMPTY Tank");
-        _display->setTextColor(WHITE); // Reset color
-    } else {
-        _display->setCursor(0, 17);
-        _display->print(" ");
-        _display->drawRect(10, 18, 6, 6, WHITE); // Empty square icon
-        _display->setCursor(20, 17);
-        _display->print("Set EMPTY Tank");
-    }
-    
-    // Instructions at bottom
+    // Show instruction text at bottom (position similar to u8g2 at 0, 41 but adjusted for 32px height)
     _display->setCursor(0, 25);
-    _display->print("Hold 3s to confirm");
+    _display->print("Hold 3s to configure");
+    _display->setCursor(10, 12);
+    _display->print("=>");
+
+    display();
+}
+
+void DisplayManager::showSettingMenuWithProgress(int currentSetting, int progressPercent) {
+    clear();
     
+    // Draw title "== CALIBRATION ==" at top (similar to u8g2 style)
+    _display->setTextSize(1);
+    _display->setCursor(10, 1);
+    _display->print("== CALIBRATION ==");
+    
+    // Setting names array
+    const char* settingNames[] = {
+        "Set FULL Tank",
+        "Set EMPTY Tank", 
+        "Factory Reset",
+        "Restart Sensor",
+        "Read Empty Freq"
+    };
+    
+    // Draw main setting text at center position
+    _display->setCursor(25, 16);
+    if (progressPercent > 0) {
+        // Show progress with the setting name
+        _display->printf("Hold: %d%%", progressPercent);
+        
+        // Draw a progress bar to show visual progress
+        int progressWidth = (progressPercent * 90) / 100; // Scale to 90 pixels width
+        _display->drawRect(20, 24, 90, 6, SSD1306_WHITE);
+        if (progressWidth > 0) {
+            _display->fillRect(20, 25, progressWidth, 4, SSD1306_WHITE);
+        }
+    } else {
+        // Normal display
+        _display->print(settingNames[currentSetting]);
+        _display->setCursor(0, 25);
+        _display->print("Hold 3s");
+    }
+
     display();
 }
 
@@ -611,4 +619,325 @@ void DisplayManager::printInverted(int x, int y, const char* text) {
 
 void DisplayManager::fillInvertedRect(int x, int y, int w, int h) {
     _display->fillRect(x, y, w, h, WHITE);
+}
+
+void DisplayManager::showFuelDetailsWithRaw(float fuelTemp, int fuelLevel, int levelMax, int levelMin, const String& rawData) {
+    clear();
+    _display->setTextSize(1);
+    _display->setCursor(0, 0);
+    
+    _display->println("FUEL + RAW DATA");
+    _display->println("---------------");
+    
+    if (!isnan(fuelTemp)) {
+        _display->printf("T:%.1fC ", fuelTemp);
+    } else {
+        _display->print("T:-- ");
+    }
+    
+    if (fuelLevel >= 0) {
+        _display->printf("L:%dL\n", fuelLevel);
+    } else {
+        _display->println("L:--");
+    }
+    
+    // Show raw data on remaining lines
+    _display->println("Raw Serial Data:");
+    
+    // Split long hex strings into multiple lines
+    String data = rawData;
+    int maxCharsPerLine = 21; // 128px / 6px per char
+    
+    while (data.length() > 0) {
+        if (data.length() <= maxCharsPerLine) {
+            _display->println(data);
+            break;
+        } else {
+            // Find last space before maxCharsPerLine
+            int splitPos = data.lastIndexOf(' ', maxCharsPerLine);
+            if (splitPos == -1) splitPos = maxCharsPerLine;
+            
+            _display->println(data.substring(0, splitPos));
+            data = data.substring(splitPos + 1);
+        }
+    }
+    
+    display();
+}
+
+void DisplayManager::showFuelDetailsScrollable(float fuelTemp, int fuelLevel, int levelMax, int levelMin, uint16_t frequency, const String& rawData, 
+                                             const uint8_t* firmwareData, int firmwareLen,
+                                             const uint8_t* serialData, int serialLen, uint32_t serialNumber, int scrollPos) {
+    clear();
+    _display->setTextSize(1);
+    _display->setCursor(0, 0);
+    
+    // Show scroll indicator
+    _display->printf("FUEL [%d/5]", scrollPos + 1);
+    _display->println();
+    _display->println("------------");
+    
+    switch (scrollPos) {
+        case 0: // Basic info - Compact layout for 128x32
+            // Line 1: Temperature + Units + Frequency together
+            if (!isnan(fuelTemp) && fuelLevel >= 0 && frequency > 0) {
+                _display->printf("T:%.1fC U:%d F:%d\n", fuelTemp, fuelLevel, frequency);
+            } else if (!isnan(fuelTemp) && fuelLevel >= 0) {
+                _display->printf("T:%.1fC U:%d F:--\n", fuelTemp, fuelLevel);
+            } else if (!isnan(fuelTemp) && frequency > 0) {
+                _display->printf("T:%.1fC U:-- F:%d\n", fuelTemp, frequency);
+            } else if (fuelLevel >= 0 && frequency > 0) {
+                _display->printf("T:-- U:%d F:%d\n", fuelLevel, frequency);
+            } else if (!isnan(fuelTemp)) {
+                _display->printf("T:%.1fC U:-- F:--\n", fuelTemp);
+            } else if (fuelLevel >= 0) {
+                _display->printf("T:-- U:%d F:--\n", fuelLevel);
+            } else if (frequency > 0) {
+                _display->printf("T:-- U:-- F:%d\n", frequency);
+            } else {
+                _display->println("T:-- U:-- F:--");
+            }
+            
+            // Line 2: Max and Min limits together
+            if (levelMax >= 0 && levelMin >= 0) {
+                _display->printf("Max:%d Min:%d", levelMax, levelMin);
+            } else {
+                _display->print("Max:-- Min:--");
+            }
+            break;
+            
+        case 1: // Raw data
+            _display->println("Raw Serial Data:");
+            if (rawData.length() > 0) {
+                String data = rawData;
+                int maxCharsPerLine = 21;
+                
+                while (data.length() > 0) {
+                    if (data.length() <= maxCharsPerLine) {
+                        _display->println(data);
+                        break;
+                    } else {
+                        int splitPos = data.lastIndexOf(' ', maxCharsPerLine);
+                        if (splitPos == -1) splitPos = maxCharsPerLine;
+                        
+                        _display->println(data.substring(0, splitPos));
+                        data = data.substring(splitPos + 1);
+                    }
+                }
+            } else {
+                _display->println("No data");
+            }
+            break;
+            
+        case 2: // Firmware info
+            _display->println("Firmware Info:");
+            if (firmwareData && firmwareLen > 0) {
+                _display->print("Version: ");
+                // Skip first 5 characters (>001C) and show only the meaningful part
+                int startIndex = 5; // Skip ">001C"
+                for (int i = startIndex; i < firmwareLen && i < 20; i++) {
+                    if (firmwareData[i] >= 32 && firmwareData[i] <= 126) {
+                        _display->print((char)firmwareData[i]);
+                    } else {
+                        _display->printf("%02X", firmwareData[i]);
+                    }
+                }
+                _display->println();
+                
+                _display->print("Hex: ");
+                for (int i = 0; i < firmwareLen && i < 16; i++) {
+                    _display->printf("%02X ", firmwareData[i]);
+                }
+                _display->println();
+                
+                _display->printf("Length: %d bytes", firmwareLen);
+            } else {
+                _display->println("No firmware data");
+                _display->println("Press SET to read");
+            }
+            break;
+            
+        case 3: // Serial number info
+            _display->println("Serial Number:");
+            if (serialData && serialLen > 0) {
+                _display->printf("SN: %lu\n", serialNumber);
+                
+                _display->print("Hex: ");
+                for (int i = 0; i < serialLen && i < 8; i++) {
+                    _display->printf("%02X ", serialData[i]);
+                }
+                _display->println();
+                
+                _display->printf("Length: %d bytes", serialLen);
+            } else {
+                _display->println("No serial data");
+                _display->println("Press SET to read");
+            }
+            break;
+            
+        case 4: // Additional info
+            _display->println("Sensor Status:");
+            _display->println("Protocol: AoooG");
+            _display->println("Baud: 9600");
+            _display->println("Connection: RS232");
+            if (levelMax >= 0 && levelMin >= 0 && fuelLevel >= 0) {
+                float percent = ((float)(fuelLevel - levelMin) / (levelMax - levelMin)) * 100.0;
+                if (percent < 0) percent = 0;
+                if (percent > 100) percent = 100;
+                _display->printf("Percent: %.1f%%", percent);
+            }
+            break;
+    }
+    
+    
+    display();
+}
+
+void DisplayManager::showSHTDetailsScrollable(float shtTemp, float shtHum, uint8_t address, int scrollPos) {
+    clear();
+    _display->setTextSize(1);
+    _display->setCursor(0, 0);
+    
+    // Show scroll indicator
+    _display->printf("SHT [%d/3]", scrollPos + 1);
+    _display->println();
+    _display->println("------------");
+    
+    switch (scrollPos) {
+        case 0: // Large display
+            _display->setTextSize(2);
+            _display->setCursor(0, 15);
+            if (!isnan(shtTemp)) {
+                _display->printf("%.1fC", shtTemp);
+            } else {
+                _display->print("--C");
+            }
+            
+            _display->setCursor(70, 12);
+            if (!isnan(shtHum)) {
+                _display->printf("%.0f%%", shtHum);
+            } else {
+                _display->print("--%");
+            }
+            break;
+            
+        case 1: // Detailed info
+            _display->setTextSize(1);
+            if (!isnan(shtTemp)) {
+                _display->printf("Temp: %.2fC\n", shtTemp);
+                
+                // Temperature status
+                if (shtTemp > 35.0) {
+                    _display->println("Status: HOT!");
+                } else if (shtTemp < 10.0) {
+                    _display->println("Status: COLD");
+                } else {
+                    _display->println("Status: Normal");
+                }
+            }
+            
+            if (!isnan(shtHum)) {
+                _display->printf("Humidity: %.1f%%\n", shtHum);
+                
+                // Humidity status
+                if (shtHum > 80.0) {
+                    _display->println("Level: HIGH");
+                } else if (shtHum < 30.0) {
+                    _display->println("Level: LOW");
+                } else {
+                    _display->println("Level: Normal");
+                }
+            }
+            break;
+            
+        case 2: // Sensor info
+            _display->printf("SHT Sensor Info:\n");
+            _display->printf("Address: 0x%02X\n", address);
+            _display->println("Protocol: I2C");
+            _display->println("Type: SHT3x");
+            _display->println("Connection: OK");
+            break;
+    }
+    
+
+    
+    display();
+}
+
+void DisplayManager::showExtendedMenu(int currentExtended) {
+    clear();
+    
+    // Title
+    _display->setCursor(0, 0);
+    _display->print("Extended Commands");
+    _display->drawLine(0, 8, 128, 8, WHITE);
+    
+    // Calculate which commands to show (we can show 3 at a time)
+    int startIndex = 0;
+    if (currentExtended >= 3) {
+        startIndex = currentExtended - 2;
+    }
+    if (startIndex > 1) {
+        startIndex = 1; // Max start index to show last 3 items (now we have 4 total)
+    }
+    
+    const char* commandNames[] = {
+        "FW: Read Version", 
+        "E3: Extended Cmd",
+        "RS: Restart Sensor",
+        "ALL: Send All Cmds"
+    };
+    
+    // Show 3 commands starting from startIndex
+    for (int i = 0; i < 3 && (startIndex + i) < 4; i++) {
+        int cmdIndex = startIndex + i;
+        int yPos = 10 + (i * 8);
+        
+        if (cmdIndex == currentExtended) {
+            _display->fillRect(0, yPos, 128, 8, WHITE);
+            _display->setTextColor(BLACK);
+            _display->setCursor(0, yPos);
+            _display->printf(">%s", commandNames[cmdIndex]);
+            _display->setTextColor(WHITE);
+        } else {
+            _display->setCursor(0, yPos);
+            _display->printf(" %s", commandNames[cmdIndex]);
+        }
+    }
+    
+    display();
+}
+
+void DisplayManager::showExtendedResults(const uint8_t* firmwareData, int firmwareLen, 
+                                       const uint8_t* extendedData, int extendedLen) {
+    clear();
+    
+    // Title
+    _display->setCursor(0, 0);
+    _display->print("Extended Results");
+    _display->drawLine(0, 8, 128, 8, WHITE);
+    
+    // Show firmware version if available
+    if (firmwareLen > 0) {
+        _display->setCursor(0, 10);
+        _display->print("FW:");
+        for (int i = 0; i < min(6, firmwareLen); i++) {
+            _display->printf(" %02X", firmwareData[i]);
+        }
+    }
+    
+    // Show extended response if available  
+    if (extendedLen > 0) {
+        _display->setCursor(0, 18);
+        _display->print("Ext:");
+        for (int i = 0; i < min(5, extendedLen); i++) {
+            _display->printf(" %02X", extendedData[i]);
+        }
+    }
+    
+    // Instructions
+    _display->setCursor(0, 26);
+    _display->print("Press to return");
+    
+    display();
 }

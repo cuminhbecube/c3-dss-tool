@@ -4,7 +4,7 @@ BuzzerManager::BuzzerManager(uint8_t pin, uint8_t channel) {
     _pin = pin;
     _channel = channel;
     _defaultFreq = 2700;  // Standard frequency for 8530 buzzer (2.7kHz)
-    _dutyCycle = 128;     // 50% duty cycle for optimal sound
+    _dutyCycle = 16;     // 50% duty cycle for optimal sound
     _resolution = 8;      // 8-bit resolution (0-255)
 }
 

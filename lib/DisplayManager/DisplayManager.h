@@ -18,11 +18,20 @@ public:
     void showSensorAndFuelWithLimits(float shtTemp, float shtHum, float fuelTemp, int fuelLevel, 
                                    int levelMax, int levelMin);
     void showFuelDetails(float fuelTemp, int fuelLevel, int levelMax, int levelMin);
+    void showFuelDetailsWithRaw(float fuelTemp, int fuelLevel, int levelMax, int levelMin, const String& rawData);
+    void showFuelDetailsScrollable(float fuelTemp, int fuelLevel, int levelMax, int levelMin, uint16_t frequency, const String& rawData, 
+                                 const uint8_t* firmwareData, int firmwareLen, 
+                                 const uint8_t* serialData, int serialLen, uint32_t serialNumber, int scrollPos);
     void showSHTDetails(float shtTemp, float shtHum, uint8_t address);
+    void showSHTDetailsScrollable(float shtTemp, float shtHum, uint8_t address, int scrollPos);
     void showSHTLargeDisplay(float shtTemp, float shtHum);
     void showSystemInfo(bool sht_available, bool fuel_available, uint8_t sht_address, int displayMode, int timeoutCounter);
     void showMainMenu(float shtTemp, float shtHum, float fuelTemp, int fuelLevel, int highlight, bool sht_available, bool fuel_available);
     void showSettingMenu(int currentSetting);
+    void showSettingMenuWithProgress(int currentSetting, int progressPercent);
+    void showExtendedMenu(int currentExtended);
+    void showExtendedResults(const uint8_t* firmwareData, int firmwareLen, 
+                           const uint8_t* extendedData, int extendedLen);
     void showDSSTool();
     void showStartupMessage();
     void showError(const char* message);

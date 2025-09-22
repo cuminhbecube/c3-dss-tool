@@ -1,33 +1,41 @@
-# ESP32-C3 DSS Tool - Advanced Sensor Monitor
+# ESP32-C3 DSS Tool - Advanced Industrial Sensor Monitor
 
 ## 🚀 Overview
-High-performance IoT monitoring system built on ESP32-C3 for industrial fuel and environmental sensors with optimized OLED interface and real-time hotswap detection.
+High-performance IoT monitoring system built on ESP32-C3 for industrial fuel sensors and environmental monitoring with optimized OLED interface, real-time hotswap detection, and comprehensive fuel sensor protocol support.
 
 ## ✨ Key Features
 
 ### 🎛 **Advanced User Interface**
 - **Instant Response**: 10-50ms encoder response time (40-200x faster)
 - **Inverted Highlights**: Professional menu selection with color inversion  
-- **Two-Column Layout**: Fuel (left) ↔ SHT (right) with large fonts
-- **Clean Design**: Minimalist interface, hidden advanced settings
+- **Multi-Screen Navigation**: Fuel details with 5-page scrollable views
+- **Compact Layout**: Optimized for 128x32 OLED displays
+- **Clean Design**: Minimalist interface with hidden advanced settings
 
 ### 🔌 **Smart Sensor Management**
 - **Hotswap Detection**: Auto-detect sensors within 5 seconds
-- **Dual Sensor Support**: SHT31/35 + Industrial fuel sensor
-- **Real-time Monitoring**: Continuous connectivity checking
+- **Dual Sensor Support**: SHT31/35 + Industrial fuel sensor with AoooG protocol
+- **Real-time Monitoring**: Continuous connectivity checking with broadcast addressing
 - **Visual/Audio Feedback**: LED + buzzer notifications
 
+### ⛽ **Advanced Fuel Sensor Support**
+- **AoooG Protocol**: Full implementation with broadcast addressing (0xFF)
+- **Comprehensive Commands**: Read data, limits, firmware, serial number, calibration
+- **Frequency Display**: Real-time frequency monitoring from sensor
+- **Auto-Discovery**: Automatic sensor address detection and configuration
+- **Extended Commands**: Factory reset, restart, empty frequency reading
+
 ### 📱 **Optimized Display**
-- **128x32 OLED**: Perfect layout utilization
-- **Large Fonts**: Size 2 for main values, excellent readability
-- **Status Indicators**: Connection status, sensor health
-- **Multi-mode Views**: Main, detail, calibration screens
+- **128x32 OLED**: Perfect layout utilization with compact information display
+- **Multi-Page Views**: 5-page scrollable fuel details (Basic, Raw Data, Firmware, Serial, Status)
+- **Compact Info Display**: Temperature + Units + Frequency on single line
+- **Status Indicators**: Connection status, sensor health, protocol information
 
 ### 🎮 **Intuitive Controls**
-- **Single Click**: Navigate FUEL ↔ SHT
-- **Click on Selection**: Enter detail view
+- **Single Click**: Navigate between different views
+- **Click on Selection**: Enter detail view with scrollable pages
 - **Double Click**: Hidden calibration access
-- **Long Press**: Execute calibration commands
+- **Long Press**: Execute calibration and advanced commands
 
 ## 🔧 Hardware Configuration
 
@@ -66,11 +74,13 @@ High-performance IoT monitoring system built on ESP32-C3 for industrial fuel and
 - **Accuracy**: ±0.3°C, ±2% RH
 - **Power**: 3.3V
 
-### ⛽ **Fuel Sensor**: Industrial RS232
-- **Protocol**: AoooG RS232 
-- **Interface**: UART (9600 baud)
-- **Data**: Temperature + fuel level
-- **Calibration**: Set full/empty points
+### ⛽ **Fuel Sensor**: Industrial AoooG Protocol
+- **Protocol**: AoooG RS232 with broadcast addressing (0xFF)
+- **Interface**: UART (9600 baud, 8N1)
+- **Commands**: Full command set with CRC-8/MAXIM checksums
+- **Data**: Temperature, fuel level, frequency, min/max limits
+- **Calibration**: Set full/empty levels, factory reset, restart
+- **Extended**: Firmware version, serial number, hidden commands
 
 ### 🎚 **Rotary Encoder**
 - **Type**: Mechanical with button
@@ -86,11 +96,19 @@ High-performance IoT monitoring system built on ESP32-C3 for industrial fuel and
 ## 💻 Software Architecture
 
 ### Core Libraries
-- **DisplayManager**: Advanced OLED graphics and layouts
+- **DisplayManager**: Advanced OLED graphics with 5-page scrollable fuel details
 - **SHTSensor**: Temperature/humidity with error handling  
-- **FuelSensor**: Industrial protocol with connectivity checks
+- **FuelSensor**: Complete AoooG protocol implementation with broadcast addressing
 - **RotaryEncoder**: Anti-jitter with multi-click detection
 - **BuzzerManager**: Audio patterns and feedback
+
+### Fuel Sensor Protocol Features
+- **Broadcast Commands**: All commands use 0xFF address for universal compatibility
+- **Complete Command Set**: Read data, limits, firmware, serial, calibration, reset
+- **CRC Validation**: CRC-8/MAXIM checksums for data integrity
+- **Auto-Discovery**: Automatic sensor detection and address learning
+- **Frequency Monitoring**: Real-time frequency display from sensor responses
+- **Extended Commands**: Factory reset, restart, empty frequency reading
 
 ### Performance Optimizations
 - **Separated Update Loops**: Sensors (2s) vs Display (50ms)
@@ -110,9 +128,25 @@ High-performance IoT monitoring system built on ESP32-C3 for industrial fuel and
 └─────────┴─────────────────┘
 ```
 
+### Fuel Detail View (FUEL [1/5])
+```
+┌─── FUEL [1/5] ───────────┐
+├─────────────────────────┤
+│ T:25.0C U:150 F:59303   │
+│ Max:1000 Min:0          │
+└─────────────────────────┘
+```
+
+### 5-Page Fuel Details Navigation
+- **Page 1/5**: Basic Info - Temperature, Units, Frequency, Max/Min limits
+- **Page 2/5**: Raw Data - Complete serial response data
+- **Page 3/5**: Firmware - Version information and hex data
+- **Page 4/5**: Serial Number - Device serial and hex representation  
+- **Page 5/5**: Status - Protocol info, connection status, percentage calculation
+
 ### Navigation Flow
 ```
-Main Menu → [Single Click] → Detail View
+Main Menu → [Single Click] → Detail View → [Scroll] → 5 Pages
     ↓
 [Double Click] → Calibration Mode
     ↓
@@ -156,12 +190,47 @@ platformio device monitor --port COM5 --baud 115200
 - **Power Consumption**: ~80mA @ 3.3V
 
 ## 🔄 Recent Updates
-- ✅ Instant encoder response optimization
-- ✅ Inverted color highlights  
-- ✅ Two-column layout implementation
-- ✅ Hotswap sensor detection
-- ✅ Menu system streamlining
-- ✅ Enhanced visual feedback
+- ✅ Complete AoooG protocol implementation with broadcast addressing
+- ✅ Frequency display integration from sensor responses  
+- ✅ 5-page scrollable fuel detail views
+- ✅ Compact display layout optimized for 128x32 OLED
+- ✅ Extended command support (firmware, serial, factory reset)
+- ✅ Auto-restart functionality with 5-second delay
+- ✅ CRC-8/MAXIM checksum validation
+- ✅ Enhanced visual feedback and error handling
+- ✅ Improved setFull/setEmpty response logic (01=success, 00=error)
+
+## 📡 AoooG Protocol Implementation
+
+### Command Structure
+```
+Request:  31 [ADDR] [CMD] [CRC]
+Response: 3E [ADDR] [CMD] [DATA...] [CRC]
+```
+
+### Supported Commands
+```
+┌─────────┬──────┬────────────────────────┐
+│ Command │ Code │ Description            │
+├─────────┼──────┼────────────────────────┤
+│ Read    │ 06   │ Read sensor data       │
+│ Limits  │ 07   │ Read min/max limits    │
+│ SetFull │ 46   │ Set full level         │
+│ SetEmpty│ 45   │ Set empty level        │
+│ ReadEmpty│ 51  │ Read empty frequency   │
+│ Firmware│ 1C   │ Read firmware version  │
+│ Serial  │ 02   │ Read serial number     │
+│ Reset   │ 18   │ Factory reset          │
+│ Restart │ 4D   │ Restart sensor         │
+│ Extended│ E3   │ Extended/hidden cmd    │
+└─────────┴──────┴────────────────────────┘
+```
+
+### Broadcast Features
+- **Universal Addressing**: All commands use 0xFF for any sensor address
+- **Auto-Discovery**: System learns actual sensor address from responses
+- **Compatibility**: Works with sensors at any address (0x01, 0x02, etc.)
+- **Robust Communication**: No need to know specific sensor address beforehand
 
 ## 📄 License
 This project is open source. See [LICENSE](LICENSE) for details.
@@ -172,27 +241,45 @@ Contributions welcome! Please read [CHANGELOG.md](CHANGELOG.md) for recent updat
 ---
 *Built with ❤️ for industrial IoT monitoring*
 
-## Tính năng
+## Tính năng chính
 - ✅ Đọc cảm biến SHT31/35 từ địa chỉ I2C 0x44 và 0x45
-- ✅ Hiển thị dữ liệu lên màn hình OLED 0.91" (128x32)
+- ✅ Đọc cảm biến nhiên liệu công nghiệp qua giao thức AoooG
+- ✅ Hiển thị dữ liệu trên màn hình OLED 0.91" (128x32) với 5 trang chi tiết
+- ✅ Giao thức broadcast với địa chỉ 0xFF cho khả năng tương thích universal
+- ✅ Hiển thị tần số thời gian thực từ cảm biến nhiên liệu
+- ✅ Bộ lệnh hoàn chỉnh: đọc dữ liệu, giới hạn, firmware, số serial, calibration
+- ✅ Kiểm tra tổng CRC-8/MAXIM cho tính toàn vẹn dữ liệu
+- ✅ Tự động phát hiện và học địa chỉ cảm biến
 - ✅ 2 LED trạng thái (hệ thống và cảm biến)
 - ✅ Còi báo với các âm thanh khác nhau
-- ✅ Tự động phát hiện cảm biến có sẵn
-- ✅ Xử lý lỗi khi cảm biến không kết nối
+- ✅ Xử lý lỗi nâng cao và thông báo trạng thái
 - ✅ Cảnh báo nhiệt độ cao (>35°C)
-- ✅ Output Serial Monitor để debug
-- ✅ Cập nhật dữ liệu mỗi 2 giây
+- ✅ Interface người dùng với encoder xoay và menu điều hướng
+- ✅ Chức năng factory reset và restart cảm biến
 
 ## Kết nối phần cứng
 
 ### ESP32-C3 DevKit M-1
 - **SDA**: GPIO 6
-- **SCL**: GPIO 5
+- **SCL**: GPIO 5  
+- **Encoder SW**: GPIO 8
+- **Encoder DT**: GPIO 9
+- **Encoder CLK**: GPIO 10
+- **Fuel TX**: GPIO 1
+- **Fuel RX**: GPIO 2
 - **LED1**: GPIO 20 (LED trạng thái hệ thống)
 - **LED2**: GPIO 21 (LED trạng thái cảm biến)
 - **BUZZER**: GPIO 7 (Còi báo)
 - **VCC**: 3.3V
 - **GND**: GND
+
+### Cảm biến nhiên liệu (AoooG Protocol)
+- **Giao thức**: AoooG RS232 với broadcast addressing
+- **Interface**: UART 9600 baud, 8N1
+- **TX**: GPIO 1 → RX của cảm biến  
+- **RX**: GPIO 2 → TX của cảm biến
+- **Địa chỉ**: 0xFF (broadcast) - tương thích với mọi địa chỉ cảm biến
+- **Dữ liệu**: Nhiệt độ, mức nhiên liệu, tần số, giới hạn min/max
 
 ### Cảm biến SHT31/35
 - **VCC** → 3.3V
@@ -212,18 +299,25 @@ Contributions welcome! Please read [CHANGELOG.md](CHANGELOG.md) for recent updat
 ```
 tool fuel c3/
 ├── src/
-│   └── main.cpp              # Code chính
+│   └── main.cpp              # Code chính với logic điều khiển encoder và menu
 ├── lib/
 │   ├── SHTSensor/            # Thư viện xử lý cảm biến SHT
 │   │   ├── SHTSensor.h
 │   │   └── SHTSensor.cpp
-│   ├── DisplayManager/       # Thư viện xử lý màn hình OLED
+│   ├── FuelSensor/           # Thư viện xử lý cảm biến nhiên liệu AoooG
+│   │   ├── FuelSensor.h
+│   │   └── FuelSensor.cpp
+│   ├── DisplayManager/       # Thư viện xử lý màn hình OLED với 5 trang chi tiết
 │   │   ├── DisplayManager.h
 │   │   └── DisplayManager.cpp
+│   ├── RotaryEncoder/        # Thư viện xử lý encoder xoay với anti-jitter
+│   │   ├── RotaryEncoder.h
+│   │   └── RotaryEncoder.cpp
 │   └── BuzzerManager/        # Thư viện xử lý buzzer PWM
 │       ├── BuzzerManager.h
 │       └── BuzzerManager.cpp
 ├── platformio.ini            # Cấu hình project
+├── CHANGELOG.md              # Lịch sử thay đổi
 └── README.md                 # File này
 ```
 
@@ -255,15 +349,34 @@ pio device monitor
 ```
 Tool Fuel C3
 Initializing...
-SHT Sensors
+SHT + Fuel Sensors
 ```
 
-### Hiển thị dữ liệu (màn hình nhỏ 128x32)
+### Màn hình chính (128x32)
 ```
-SHT Sensor Data
-Temp: 25.4 C
-Hum:  60 %
+┌─── DSS TOOL ─────────────┐
+├─────────┬─────────────────┤
+│  FUEL   │      SHT        │
+│  150L   │     25.4°C      │
+│         │     60%         │
+└─────────┴─────────────────┘
 ```
+
+### Chi tiết cảm biến nhiên liệu FUEL [1/5]
+```
+┌─── FUEL [1/5] ───────────┐
+├─────────────────────────┤
+│ T:25.0C U:150 F:59303   │ ← Nhiệt độ + Đơn vị + Tần số
+│ Max:1000 Min:0          │ ← Giới hạn Max và Min
+└─────────────────────────┘
+```
+
+### 5 trang chi tiết cảm biến nhiên liệu:
+- **[1/5] Basic Info**: Nhiệt độ, đơn vị, tần số, giới hạn max/min
+- **[2/5] Raw Data**: Dữ liệu serial thô từ cảm biến  
+- **[3/5] Firmware**: Phiên bản firmware và dữ liệu hex
+- **[4/5] Serial Number**: Số serial thiết bị và biểu diễn hex
+- **[5/5] Status**: Thông tin giao thức, trạng thái kết nối, tính % mức nhiên liệu
 
 ### Hiển thị lỗi
 ```
@@ -273,15 +386,51 @@ No SHT sensors found!
 
 ## Serial Monitor Output
 ```
-Tool Fuel C3 - SHT Sensor Monitor
+Tool Fuel C3 - Advanced Sensor Monitor
 Initializing...
 SHT sensor found at 0x44
 SHT sensor found at 0x45
-Found 2 SHT sensor(s)
+Fuel sensor initialized with broadcast address 0xFF
+Found 2 SHT sensor(s) + 1 Fuel sensor
 Sensor 1 (0x44): 25.4°C, 60%
 Sensor 2 (0x45): 26.1°C, 58%
+Fuel: 25.0°C, 150 units, 59303 Hz, Max:1000, Min:0
+Response from sensor address: 0x01
+Updated sensor address to: 0x01
 ---
 ```
+
+## Giao thức AoooG - Bộ lệnh đầy đủ
+
+### Cấu trúc lệnh
+```
+Yêu cầu:  31 [ADDR] [CMD] [CRC]
+Phản hồi: 3E [ADDR] [CMD] [DATA...] [CRC]
+```
+
+### Các lệnh được hỗ trợ
+```
+┌─────────────────┬──────┬────────────────────────┐
+│ Lệnh            │ Mã   │ Mô tả                  │
+├─────────────────┼──────┼────────────────────────┤
+│ Đọc dữ liệu     │ 06   │ Đọc nhiệt độ, mức      │
+│ Đọc giới hạn    │ 07   │ Đọc min/max            │
+│ Đặt mức đầy     │ 46   │ Calibration mức đầy    │
+│ Đặt mức trống   │ 45   │ Calibration mức trống  │
+│ Đọc tần số trống│ 51   │ Đọc tần số mức trống   │
+│ Đọc firmware    │ 1C   │ Phiên bản firmware     │
+│ Đọc số serial   │ 02   │ Số serial thiết bị     │
+│ Factory reset   │ 18   │ Khôi phục cài đặt gốc  │
+│ Khởi động lại   │ 4D   │ Restart cảm biến       │
+│ Lệnh mở rộng    │ E3   │ Lệnh ẩn/mở rộng        │
+└─────────────────┴──────┴────────────────────────┘
+```
+
+### Đặc điểm Broadcast
+- **Địa chỉ Universal**: Tất cả lệnh dùng 0xFF cho mọi địa chỉ cảm biến
+- **Tự động học**: Hệ thống học địa chỉ thực từ phản hồi cảm biến  
+- **Tương thích**: Hoạt động với cảm biến ở bất kỳ địa chỉ nào (0x01, 0x02...)
+- **Giao tiếp mạnh mẽ**: Không cần biết địa chỉ cụ thể của cảm biến
 
 ## Hoạt động LED và Buzzer
 
@@ -399,22 +548,37 @@ DisplayManager display(128, 32, 0x3C);  // 0x3C hoặc 0x3D
 ## Troubleshooting
 
 ### 1. Màn hình OLED không sáng
-- Kiểm tra kết nối I2C
+- Kiểm tra kết nối I2C (GPIO 6 SDA, GPIO 5 SCL)
 - Thử địa chỉ 0x3D thay vì 0x3C
 - Kiểm tra nguồn 3.3V
 
-### 2. Không đọc được cảm biến
+### 2. Không đọc được cảm biến SHT
 - Kiểm tra kết nối I2C
 - Kiểm tra địa chỉ cảm biến (0x44 hoặc 0x45)
 - Kiểm tra nguồn 3.3V
 
-### 3. Build failed
+### 3. Cảm biến nhiên liệu không phản hồi
+- Kiểm tra kết nối UART (GPIO 1 TX, GPIO 2 RX)
+- Xác nhận baud rate 9600, 8N1
+- Kiểm tra nguồn và dây mass
+- Sử dụng Serial Monitor để xem debug messages
+
+### 4. Encoder không hoạt động
+- Kiểm tra kết nối GPIO 8 (SW), GPIO 9 (DT), GPIO 10 (CLK)
+- Kiểm tra pull-up resistor nội hoặc ngoại
+- Xem Serial Monitor để debug encoder events
+
+### 5. Build failed
 - Kiểm tra thư viện đã được cài đặt đúng
 - Xóa folder `.pio` và build lại
+- Cập nhật PlatformIO lên phiên bản mới nhất
 
 ## Phát triển thêm
-- [ ] Thêm WiFi connectivity
-- [ ] Lưu dữ liệu vào SPIFFS
-- [ ] Web interface
-- [ ] Cảnh báo ngưỡng
-- [ ] Bluetooth Low Energy
+- [ ] WiFi connectivity cho remote monitoring
+- [ ] Lưu dữ liệu vào SPIFFS với timestamp  
+- [ ] Web interface cho configuration
+- [ ] Cảnh báo ngưỡng qua email/SMS
+- [ ] Bluetooth Low Energy cho mobile app
+- [ ] Data logging với múi giờ
+- [ ] Calibration wizard với guided setup
+- [ ] Multi-sensor network support
